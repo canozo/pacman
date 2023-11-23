@@ -5,9 +5,7 @@ import pyglet
 
 class SpriteLoader(object):
     def __init__(self):
-        base_dir = str(os.path.dirname(__file__).split('pypac')[0]) + "pypac/pypac/client/graphics/"
-        res_dir = base_dir
-        pyglet.resource.path = [res_dir]
+        pyglet.resource.path = [os.path.dirname(__file__) + '/']
         pyglet.resource.reindex()
         self._sprite_sheets = {}
 

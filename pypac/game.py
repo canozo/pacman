@@ -1,5 +1,6 @@
 import pyglet
 from pyglet import gl
+from pyglet.math import Mat4
 
 from pypac import gameobjects, services
 from pypac.ai import GhostAI
@@ -26,14 +27,8 @@ class Game(object):
 
     def on_draw(self):
         self.window.clear()
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
-        gl.glPushMatrix()
-        gl.glScalef(1.5, -1.5, 0)
-        gl.glOrtho(-300, 724, 650, -150, -1, 1)
         self.level_batch.draw()
         self.game_objects_batch.draw()
-        gl.glPopMatrix()
 
     def on_key_press(self, symbol, modifiers):
         for input_ in self.inputs:
@@ -66,21 +61,29 @@ class Game(object):
         self._initialize_keyboard_players()
         self._initialize_joystick_players()
         self._initialize_ui()
+        self._initialize_projection()
         self._start_level()
+        # TODO: schedule interval is too short on windows but fine on macos?
         pyglet.clock.schedule_interval(self.update, 1 / 1000)
         pyglet.app.run()
 
     def _initialize_keyboard_players(self):
-        keyboard_1 = input.Keyboard(input.KeyboardMapping.default())
+        # keyboard_1 = input.Keyboard(input.KeyboardMapping.default())
+        # self.inputs.append(keyboard_1)
         keyboard_2 = input.Keyboard(input.KeyboardMapping.alternate())
-        self.inputs.append(keyboard_1)
         self.inputs.append(keyboard_2)
 
     def _initialize_ui(self):
-        self.window = pyglet.window.Window(1024, 800)
+        self.window = pyglet.window.Window(448, 496)
         self.window.event(self.on_draw)
         self.window.event(self.on_key_press)
         self.window.event(self.on_key_release)
+
+    def _initialize_projection(self):
+        # self.window.view = self.window.view.scale((1.5, -1.5, 0))
+        self.window.projection = Mat4.orthogonal_projection(
+            -300, 724, 650, -150, -1, 1
+        )
 
     def _initialize_joystick_players(self):
         joysticks = pyglet.input.get_joysticks()
@@ -91,10 +94,6 @@ class Game(object):
             self.inputs.append(joystick_input)
 
     def _initialize_opengl(self):
-        # Initialize Modelview matrix
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glLoadIdentity()
-
         # Set antialiasing
         gl.glEnable(gl.GL_LINE_SMOOTH)
         gl.glEnable(gl.GL_POLYGON_SMOOTH)
@@ -112,7 +111,9 @@ class Game(object):
         self.level = self.level_loader.load_level("level-1")
         ghost_classes = (gameobjects.GhostPink, gameobjects.GhostTeal, gameobjects.GhostRed, gameobjects.GhostPeach)
         for i, ghost_class in enumerate(ghost_classes):
-            ghost = ghost_class(self, 32 * i, 464)
+            x = 32 * i if i % 2 == 0 else 464 - 32 * i
+            ghost = ghost_class(self, x, 464)
+
             self.game_objects.append(ghost)
             self.npcs.append(NPC(ghost, GhostAI))
 

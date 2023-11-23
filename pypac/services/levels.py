@@ -3,8 +3,7 @@ import os
 
 from pypac.levelanalyser import LevelArrayAdapter
 
-# TODO These paths should be moved somewhere it makes sense
-LEVEL_FOLDER_PATH = str(os.path.dirname(__file__).split('pypac')[0]) + "pypac\\pypac\\levels\\"
+LEVEL_FOLDER_PATH = os.path.dirname(__file__)[:-8] + '/levels'
 
 
 class LevelLoader(object):
